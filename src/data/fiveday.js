@@ -1,4 +1,4 @@
-export default {
+const data_fiveday = {
   Headline: {
     EffectiveDate: '2020-08-22T08:00:00+02:00',
     EffectiveEpochDate: 1598076000,
@@ -177,7 +177,7 @@ export default {
         },
         HoursOfPrecipitation: 1.0,
         HoursOfRain: 1.0,
-        HoursOfSnow: 0.0,
+        HoursOfSnow: 10.0,
         HoursOfIce: 0.0,
         CloudCover: 71,
       },
@@ -412,7 +412,7 @@ export default {
         },
         HoursOfPrecipitation: 0.0,
         HoursOfRain: 0.0,
-        HoursOfSnow: 0.0,
+        HoursOfSnow: 10.0,
         HoursOfIce: 0.0,
         CloudCover: 60,
       },
@@ -1188,3 +1188,5 @@ export default {
     },
   ],
 };
+
+export default data_fiveday;
