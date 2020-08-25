@@ -1,4 +1,4 @@
-export default {
+const data_tomorrow = {
   Headline: {
     EffectiveDate: '2020-08-17T02:00:00+02:00',
     EffectiveEpochDate: 1597622400,
@@ -140,3 +140,5 @@ export default {
     },
   ],
 };
+
+export default data_tomorrow;

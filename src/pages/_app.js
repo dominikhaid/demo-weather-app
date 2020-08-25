@@ -1,96 +1,13 @@
 import React from 'react';
 import App from 'next/app';
-import '../../public/less/main.css';
-import NavContainer from '@/components/Header';
-import RequestCount from '@/components/RequestCount';
-import FooterContainer from '@/components/Footer';
-import {Provider} from '@/context/provider';
-import AppContext from '@/context/app-context';
-import Link from 'next/link';
-
-import {Header, List, Modal, Button, Icon} from 'semantic-ui-react';
-
-export function RenderModal(props) {
-  return (
-    <Modal
-      onClose={() => {
-        props.setNewState({modalState: false});
-      }}
-      onOpen={() => {
-        props.setNewState({modalState: false});
-      }}
-      open={props.modalState}
-    >
-      <Modal.Header>{props.modalHeader}</Modal.Header>
-      <Modal.Content>
-        <Modal.Description>
-          <Header as="h4">{props.modalHeaderDes}</Header>
-        </Modal.Description>
-        <List selection verticalAlign="middle">
-          {props.modalData && props.modalData.length > 0
-            ? props.modalData.map((city, index) => {
-                return (
-                  <List.Item>
-                    <List.Content
-                      className={
-                        props.modalActiveItem === index ? 'active' : ''
-                      }
-                      cityInd={index}
-                      onClick={e => {
-                        props.setNewState({
-                          ...props,
-                          modalActiveItem: index,
-                        });
-                      }}
-                    >
-                      <List.Header>{city.city}</List.Header>
-                      <List.Description>{city.plz}</List.Description>
-                    </List.Content>
-                    {props.modalActiveItem === index ? (
-                      <Icon name={'check circle'} />
-                    ) : (
-                      false
-                    )}
-                  </List.Item>
-                );
-              })
-            : ''}
-        </List>
-      </Modal.Content>
-      <Modal.Actions>
-        <Button
-          color="black"
-          onClick={() => {
-            props.setNewState({
-              ...props,
-              modalState: false,
-            });
-          }}
-        >
-          Abbrechen
-        </Button>
-        {props.modalActiveItem !== false ? (
-          <Link href="/weather">
-            <Button
-              content="Ok"
-              labelPosition="right"
-              icon="checkmark"
-              positive
-            />
-          </Link>
-        ) : (
-          <Button
-            disabled
-            content="Ok"
-            labelPosition="right"
-            icon="checkmark"
-            positive
-          />
-        )}
-      </Modal.Actions>
-    </Modal>
-  );
-}
+import 'public/css/global.css';
+import 'public/css/weather-icons-core.css';
+import Nav from 'components/Nav';
+import RequestData from 'lib/requests';
+import {AppProvider, AppContext} from 'context/AppState';
+import Background from 'components/Background';
+import AppIcon from 'components/AppIcon';
+import {weatherSwitcherControls} from 'src/lib/utils';
 
 export function reportWebVitals(metric) {
   if (metric.label === 'web-vital') {
@@ -99,48 +16,95 @@ export function reportWebVitals(metric) {
 }
 
 class MainApp extends App {
-  state = {
-    modalState: false,
-    modalMode: false,
-    modalData: [],
-    modalHeader: false,
-    modalHeaderDes: false,
-    modalActiveItem: false,
-    setNewState: e => {
-      this.setState(e);
-    },
-  };
+  constructor(props) {
+    super(props);
+    this.state = {theme: 'light'};
+  }
+
+  componentDidMount() {
+    // NOTE THEME CONTROLL /LIGHT DARK
+    let newTheme = false;
+    if (process.browser) {
+      if ('theme' in localStorage && this.state.theme !== localStorage.theme) {
+        newTheme = localStorage.theme;
+      } else if (
+        !this.state.theme &&
+        !('theme' in localStorage) &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches
+      ) {
+        newTheme = 'dark';
+      } else if (
+        !this.state.theme &&
+        !('theme' in localStorage) &&
+        window.matchMedia('(prefers-color-scheme: light)').matches
+      ) {
+        newTheme = 'light';
+      }
+
+      if (this.state.theme !== 'light') {
+        document.querySelector('html').classList.remove('light');
+        this.setState({theme: 'light'});
+      }
+      if (this.state.theme !== 'dark') {
+        document.querySelector('html').classList.remove('dark');
+        this.setState({theme: 'dark'});
+      }
+      document.querySelector('html').classList.add(newTheme);
+    }
+
+    // NOTE WeatherView Control Element
+    const container = document.getElementById('app-main-container');
+    const control_top_weather_switch = container => {
+      window.addEventListener('scroll', function (e) {
+        weatherSwitcherControls();
+      });
+    };
+
+    //NOTE MOBILE
+    if (container && window.innerWidth < 767) {
+      control_top_weather_switch(container);
+    }
+
+    return () => {
+      if (container && window.innerWidth < 767) {
+        window.removeEventListener('scroll', control_top_weather_switch);
+      }
+    };
+  }
 
   render() {
-    const {Component, pageProps} = this.props;
+    const {Component} = this.props;
 
+    if (
+      process.browser &&
+      window.location.pathname === '/app/weather-app/tailwind'
+    ) {
+      return (
+        <>
+          <Component />
+        </>
+      );
+    }
     return (
-      <Provider>
+      <AppProvider>
         <AppContext.Consumer>
-          {stateData => {
+          {appState => {
             return (
               <React.Fragment>
-                <main
-                  style={{marginBottom: '1rem'}}
-                  id="main"
-                  className="scrollBoxY dimmable"
-                >
-                  <RequestCount {...stateData} />
-                  <Component
-                    {...stateData}
-                    modal={this.state}
-                    RenderModal={RenderModal}
-                  />
+                <Nav {...appState} weather={appState.citys} />
+                <main id="main" className="transform skew-y-1 pt-lg">
+                  <AppIcon>
+                    <Component {...appState} />
+                    <RequestData {...appState} />
+                  </AppIcon>
                 </main>
-                <NavContainer {...stateData} />
-                <FooterContainer />
+                <Background />
               </React.Fragment>
             );
           }}
         </AppContext.Consumer>
-      </Provider>
+      </AppProvider>
     );
   }
 }
-
 export default MainApp;

@@ -1,0 +1,48 @@
+import React from 'react';
+import SelectionList from 'src/components/SelectionList';
+import {storiesOf} from '@storybook/react';
+import withPropsCombinations from 'react-storybook-addon-props-combinations';
+import appState from './data-mockup';
+
+const innerStyle = {
+  padding: 'var(--weather-paddig-y) var(--weather-paddig-x)',
+};
+
+const lastStyle = {
+  maxHeight: '100px',
+};
+
+function WarppedSelectionList(props) {
+  return (
+    <div className="bg-secondary-lightest dark:bg-gray-darkest">
+      <div id="__next" className={`${props.class}`}>
+        <main style={{...innerStyle}} id="main">
+          <SelectionList
+            getCityByName={appState.getCityByName}
+            {...props}
+            data={Object.values(appState.citys)}
+          />
+        </main>
+      </div>
+    </div>
+  );
+}
+
+export default {
+  title: 'Elements',
+  component: WarppedSelectionList,
+};
+
+storiesOf('Elements', module).add(
+  'Selection List',
+  withPropsCombinations(
+    WarppedSelectionList,
+    {
+      class: ['light', 'dark'],
+      value: ['', 'Input Text'],
+    },
+    {
+      showSource: true,
+    },
+  ),
+);

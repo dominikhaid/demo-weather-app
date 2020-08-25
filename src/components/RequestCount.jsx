@@ -1,79 +1,46 @@
-import React, {useState} from 'react';
-import {Icon} from 'semantic-ui-react';
-import MainContainer from '@/components/MainContainer';
+import React from 'react';
+import PropTypes from 'prop-types';
 import {useRouter} from 'next/router';
+import Bolt from 'public/images/svg/lightning-bolt.svg';
+import Fire from 'public/images/svg/fire.svg';
 
-export default function RequestCount(appStates) {
+/**
+ * @desc NOTE RENDER THE REQUEST LIMIT STATUS
+ *@param {Number} limit requestg limit state
+ */
+export default function RequestCount({limit}) {
+  RequestCount.propTypes = {
+    limit: PropTypes.number,
+  };
+
   const router = useRouter();
+  if (!process.browser) return <></>;
+  const DATE_TEST = new Date().toGMTString().replace(/(\d\d:\d\d:\d\d.*)/, '');
 
-  if (process.env.NEXT_PUBLIC_DEBUG === 'false') {
-    console.debug = () => {
-      return;
-    };
+  //NOTE SET COOKIE IF REUQEST LIMIT REACHED
+  if (limit <= -1) {
+    window.localStorage.setItem('limit', DATE_TEST);
   }
 
-  if (!process.browser) {
-    //console.debug('Home SERVER');
-  } else {
-    if (appStates.requestState <= -1 && process.browser) {
-      let limitDate = new Date();
-      limitDate = limitDate
-        .toGMTString(limitDate)
-        .replace(/(\d\d:\d\d:\d\d.*)/, '');
+  const COOKIE_LIMIT =
+    window.localStorage.getItem('limit') &&
+    window.localStorage.getItem('limit') === DATE_TEST
+      ? true
+      : false;
 
-      window.localStorage.setItem('limit', limitDate);
-    }
-
-    let limit = window.localStorage.getItem('limit');
-    let test = new Date();
-    test = test.toGMTString(test).replace(/(\d\d:\d\d:\d\d.*)/, '');
-
-    if (limit === test && window.location.pathname !== '/app/weather-app/limit')
-      router.push('/limit');
-  }
+  if (COOKIE_LIMIT && window.location.pathname !== '/app/weather-app/limit')
+    router.push('/limit');
 
   return (
     <React.Fragment>
-      <MainContainer id={'requestCount'}>
-        <div>
-          <div
-            style={{
-              display: 'flex',
-              position: 'absolute',
-              bottom: '0.5rem',
-              left: '2rem',
-            }}
-          >
-            <Icon
-              style={{
-                color:
-                  appStates.requestState < 2
-                    ? 'red'
-                    : appStates.requestState < 4
-                    ? 'orange'
-                    : 'inerhit',
-                marginRight: '10px',
-              }}
-              name="dna"
-            />
-            <p
-              style={{
-                color:
-                  appStates.requestState === 0
-                    ? 'red'
-                    : appStates.requestState <= 2
-                    ? 'orange'
-                    : 'inerhit',
-                fontWeight: 'bold',
-                margin: '-6px',
-              }}
-            >
-              {appStates.requestState}
-            </p>
-          </div>
-          {/* <h1 id="title">WEAHTER-APP</h1> */}
-        </div>
-      </MainContainer>
+      <aside id="main-menu-request-count" className="p-sm">
+        {limit > 5 ? (
+          <Bolt className="text-green" />
+        ) : (
+          <Fire className="text-red" />
+        )}
+        <p className="text-white text-center font-semibold m-none">{limit}</p>
+      </aside>
     </React.Fragment>
   );
 }

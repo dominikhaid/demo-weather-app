@@ -1,18 +1,20 @@
 import React from 'react';
 
-export default function FooterContainer(props) {
+export default function Footer() {
   return (
     <React.Fragment>
-      <footer className="material-grid material-grid__col--medium--12 felx-center">
-        <p style={{textAlign: 'center'}}>
-          <small>
-            © Dominik Haid{' '}
-            <a href="https://www.dominikhaid.de" target="_blank">
-              www.dominikhaid.de
-            </a>
-          </small>
-        </p>
-      </footer>
+      <p style={{bottom: '1rem'}}>
+        <small>
+          © Dominik Haid &nbsp;
+          <a
+            href="https://www.dominikhaid.de"
+            rel={'noreferrer'}
+            target="_blank"
+          >
+            www.dominikhaid.de
+          </a>
+        </small>
+      </p>
     </React.Fragment>
   );
 }
